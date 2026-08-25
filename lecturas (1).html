@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lecturas para Estudiantes — Inglés A · B · C</title>
+<style>
+  :root{
+    --paper:#f6f1e7;
+    --ink:#26231d;
+    --ink-soft:#5c564a;
+    --line:#d9cfba;
+    --a-color:#4f7a63;
+    --b-color:#b06a3a;
+    --c-color:#6c4f8a;
+    --accent-bg:#fffdf8;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:'Iowan Old Style','Palatino Linotype',Georgia,serif;
+    background:var(--paper);
+    color:var(--ink);
+    background-image:
+      linear-gradient(var(--paper),var(--paper)),
+      repeating-linear-gradient(0deg, transparent, transparent 27px, rgba(90,80,50,0.05) 28px);
+  }
+  header{
+    padding:48px 24px 28px;
+    text-align:center;
+    border-bottom:3px double var(--line);
+  }
+  header h1{
+    font-size:2.4rem;
+    margin:0 0 6px;
+    letter-spacing:0.5px;
+  }
+  header p{
+    color:var(--ink-soft);
+    font-style:italic;
+    margin:0;
+    font-size:1.05rem;
+  }
+  .levels-bar{
+    display:flex;
+    justify-content:center;
+    gap:10px;
+    flex-wrap:wrap;
+    padding:20px 16px;
+    position:sticky;
+    top:0;
+    background:var(--paper);
+    z-index:10;
+    border-bottom:1px solid var(--line);
+  }
+  .lvl-btn{
+    font-family:inherit;
+    font-size:0.95rem;
+    padding:8px 18px;
+    border-radius:20px;
+    border:1.5px solid var(--ink);
+    background:transparent;
+    cursor:pointer;
+    color:var(--ink);
+    transition:all .15s ease;
+  }
+  .lvl-btn.active[data-lvl="A"]{background:var(--a-color);border-color:var(--a-color);color:#fff;}
+  .lvl-btn.active[data-lvl="B"]{background:var(--b-color);border-color:var(--b-color);color:#fff;}
+  .lvl-btn.active[data-lvl="C"]{background:var(--c-color);border-color:var(--c-color);color:#fff;}
+  .lvl-btn.active[data-lvl="ALL"]{background:var(--ink);border-color:var(--ink);color:#fff;}
+
+  main{max-width:880px;margin:0 auto;padding:20px 20px 80px;}
+
+  .card{
+    background:var(--accent-bg);
+    border:1px solid var(--line);
+    border-radius:6px;
+    margin-bottom:22px;
+    box-shadow:0 1px 3px rgba(0,0,0,0.06);
+    overflow:hidden;
+  }
+  .card-head{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:14px 20px;
+    cursor:pointer;
+    gap:12px;
+  }
+  .card-head:hover{background:rgba(0,0,0,0.02);}
+  .tag{
+    font-size:0.72rem;
+    text-transform:uppercase;
+    letter-spacing:1px;
+    padding:3px 9px;
+    border-radius:12px;
+    color:#fff;
+    flex-shrink:0;
+  }
+  .tag.A{background:var(--a-color);}
+  .tag.B{background:var(--b-color);}
+  .tag.C{background:var(--c-color);}
+  .card-title{
+    font-size:1.15rem;
+    flex-grow:1;
+    margin:0;
+  }
+  .chevron{transition:transform .2s ease; font-size:0.9rem; color:var(--ink-soft);}
+  .card.open .chevron{transform:rotate(90deg);}
+
+  .card-body{
+    display:none;
+    padding:0 22px 22px;
+    border-top:1px solid var(--line);
+  }
+  .card.open .card-body{display:block;}
+
+  .text-block{
+    font-size:1.12rem;
+    line-height:2.1;
+    margin:18px 0 10px;
+  }
+  .w{
+    cursor:pointer;
+    border-bottom:1.5px dotted #9c8f6f;
+    padding:1px 1px;
+    border-radius:3px;
+  }
+  .w:hover{background:#eee2c2;}
+  .w.picked{background:#e7d9a8;}
+  .punct{border-bottom:none;cursor:default;}
+
+  .toolbar{
+    display:flex;
+    gap:10px;
+    margin:14px 0 4px;
+    flex-wrap:wrap;
+  }
+  .btn{
+    font-family:inherit;
+    font-size:0.85rem;
+    padding:7px 14px;
+    border-radius:16px;
+    border:1px solid var(--ink);
+    background:transparent;
+    cursor:pointer;
+    color:var(--ink);
+  }
+  .btn:hover{background:var(--ink);color:#fff;}
+
+  .full-translation{
+    display:none;
+    margin-top:14px;
+    padding:14px 16px;
+    background:#efe6cd;
+    border-left:4px solid var(--ink-soft);
+    border-radius:4px;
+    font-style:italic;
+    line-height:1.8;
+  }
+  .full-translation.show{display:block;}
+
+  .word-pop{
+    display:none;
+    margin-top:10px;
+    padding:10px 14px;
+    background:#fff;
+    border:1px solid var(--line);
+    border-radius:5px;
+    font-size:0.98rem;
+  }
+  .word-pop.show{display:block;}
+  .word-pop b{color:var(--b-color);}
+
+  .search-wrap{
+    max-width:880px;
+    margin:0 auto;
+    padding:0 20px;
+  }
+  .search-wrap input{
+    width:100%;
+    padding:10px 14px;
+    font-family:inherit;
+    font-size:1rem;
+    border:1px solid var(--line);
+    border-radius:20px;
+    background:var(--accent-bg);
+    margin-bottom:6px;
+  }
+  .empty-msg{
+    text-align:center;
+    color:var(--ink-soft);
+    font-style:italic;
+    padding:40px 0;
+    display:none;
+  }
+  .count-note{
+    text-align:center;
+    color:var(--ink-soft);
+    font-size:0.85rem;
+    margin:10px 0 0;
+  }
+  footer{
+    text-align:center;
+    color:var(--ink-soft);
+    font-size:0.8rem;
+    padding:20px;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Lecturas para Estudiantes</h1>
+  <p>60 textos en inglés · niveles A · B · C · traducción de cada palabra y del texto completo</p>
+</header>
+
+<div class="levels-bar">
+  <button class="lvl-btn active" data-lvl="ALL">Todos</button>
+  <button class="lvl-btn" data-lvl="A">Nivel A (básico)</button>
+  <button class="lvl-btn" data-lvl="B">Nivel B (intermedio)</button>
+  <button class="lvl-btn" data-lvl="C">Nivel C (avanzado)</button>
+</div>
+
+<div class="search-wrap">
+  <input id="searchBox" type="text" placeholder="Buscar por título...">
+  <p class="count-note" id="countNote"></p>
+</div>
+
+<main id="mainList"></main>
+<p class="empty-msg" id="emptyMsg">No se encontraron textos.</p>
+
+<footer>Haz clic en cualquier palabra del texto para ver su traducción. Usa el botón "Traducción completa" para ver todo el texto en español.</footer>
+
+<script>
+/* ============ DICCIONARIO DE PALABRAS FUNCIONALES (compartido) ============ */
+const FUNC = {
+  "the":"el / la / los / las","a":"un / una","an":"un / una","and":"y","or":"o","but":"pero",
+  "is":"es / está","are":"son / están","am":"soy / estoy","was":"era / estaba","were":"eran / estaban",
+  "be":"ser / estar","been":"sido / estado","being":"siendo","to":"a / para","of":"de","in":"en",
+  "on":"en / sobre","at":"en (lugar/hora)","for":"para / por","with":"con","without":"sin","by":"por",
+  "from":"de / desde","about":"sobre / acerca de","into":"dentro de","onto":"sobre","out":"fuera",
+  "up":"arriba","down":"abajo","over":"sobre / encima","under":"debajo de","between":"entre",
+  "through":"a través de","after":"después de","before":"antes de","during":"durante","while":"mientras",
+  "this":"este / esta","that":"ese / aquel / que","these":"estos / estas","those":"esos / aquellos",
+  "it":"eso / lo / ello","its":"su (de eso)","he":"él","she":"ella","they":"ellos / ellas","we":"nosotros",
+  "you":"tú / usted / ustedes","i":"yo","him":"lo / le (a él)","her":"la / le (a ella)","them":"los / les",
+  "us":"nos / nosotros","my":"mi","your":"tu","his":"su (de él)","their":"su (de ellos)","our":"nuestro",
+  "not":"no","no":"no / ningún","very":"muy","more":"más","most":"la mayoría / más","some":"algunos/as",
+  "any":"algún / ninguno","many":"muchos/as","much":"mucho","all":"todo/a/os/as","other":"otro",
+  "than":"que (comparación)","so":"así que / tan","because":"porque","if":"si","when":"cuando",
+  "where":"dónde","what":"qué","who":"quién","which":"cuál / que","how":"cómo","why":"por qué",
+  "there":"allí / hay","here":"aquí","also":"también","too":"también / demasiado","just":"solo / justo",
+  "only":"solo / únicamente","even":"incluso","still":"todavía","again":"de nuevo","then":"entonces / luego",
+  "now":"ahora","today":"hoy","every":"cada","each":"cada uno","can":"poder (presente)","could":"poder (pasado)",
+  "will":"(futuro) / -rá","would":"(condicional) / -ría","should":"debería","must":"debe / tiene que",
+  "may":"puede que","might":"podría","do":"hacer","does":"hace","did":"hizo","have":"tener / haber",
+  "has":"tiene / ha","had":"tuvo / había","one":"uno","two":"dos","three":"tres","four":"cuatro",
+  "five":"cinco","six":"seis","seven":"siete","eight":"ocho","nine":"nueve","ten":"diez",
+  "as":"como","like":"como / gustar","new":"nuevo","old":"viejo","first":"primero","last":"último",
+  "yes":"sí","not only":"no solo","between":"entre","people":"gente / personas"
+};
+
+/* ============ TEXTOS ============ */
+const TEXTS = [
+
+/* ---------------- NIVEL A (20) ---------------- */
+{level:"A", title:"My Family", en:"I have a big family. My mother is a teacher and my father is a doctor. I have two brothers and one sister. We live in a small house near the city. Every Sunday, we eat dinner together.",
+es:"Tengo una familia grande. Mi madre es maestra y mi padre es médico. Tengo dos hermanos y una hermana. Vivimos en una casa pequeña cerca de la ciudad. Cada domingo, cenamos juntos.",
+gloss:{family:"familia",mother:"madre",teacher:"maestra",father:"padre",doctor:"médico",brothers:"hermanos",sister:"hermana",live:"vivir",small:"pequeña",house:"casa",near:"cerca",city:"ciudad",sunday:"domingo",eat:"comer",dinner:"cena",together:"juntos",big:"grande"}},
+
+{level:"A", title:"A Day at School", en:"I go to school every morning. My classes start at eight o'clock. I like math and art, but I don't like history. At lunch, I eat with my friends. School finishes at three in the afternoon.",
+es:"Voy a la escuela todas las mañanas. Mis clases empiezan a las ocho. Me gustan las matemáticas y el arte, pero no me gusta la historia. En el almuerzo, como con mis amigos. La escuela termina a las tres de la tarde.",
+gloss:{go:"ir",school:"escuela",morning:"mañana",classes:"clases",start:"empezar",eight:"ocho",oclock:"en punto",like:"gustar",math:"matemáticas",art:"arte",history:"historia",lunch:"almuerzo",friends:"amigos",finishes:"termina",three:"tres",afternoon:"tarde"}},
+
+{level:"A", title:"My House", en:"My house has three bedrooms and one bathroom. The kitchen is small but nice. There is a garden behind the house with many flowers. I share my room with my brother. We have a dog named Max.",
+es:"Mi casa tiene tres habitaciones y un baño. La cocina es pequeña pero bonita. Hay un jardín detrás de la casa con muchas flores. Comparto mi habitación con mi hermano. Tenemos un perro llamado Max.",
+gloss:{house:"casa",bedrooms:"habitaciones",bathroom:"baño",kitchen:"cocina",small:"pequeña",nice:"bonita",garden:"jardín",behind:"detrás",flowers:"flores",share:"compartir",room:"habitación",brother:"hermano",dog:"perro",named:"llamado"}},
+
+{level:"A", title:"The Weather Today", en:"Today the weather is sunny and warm. There are no clouds in the sky. I want to go to the park with my friends. We can play football or ride our bikes. Tomorrow it might rain.",
+es:"Hoy el clima está soleado y cálido. No hay nubes en el cielo. Quiero ir al parque con mis amigos. Podemos jugar fútbol o andar en bicicleta. Mañana podría llover.",
+gloss:{today:"hoy",weather:"clima",sunny:"soleado",warm:"cálido",clouds:"nubes",sky:"cielo",want:"querer",park:"parque",play:"jugar",football:"fútbol",ride:"andar",bikes:"bicicletas",tomorrow:"mañana (día siguiente)",rain:"llover"}},
+
+{level:"A", title:"My Favorite Food", en:"My favorite food is pizza. I like it with cheese and tomatoes. On weekends, my family cooks together. We also enjoy pasta and salad. I don't like spicy food very much.",
+es:"Mi comida favorita es la pizza. Me gusta con queso y tomates. Los fines de semana, mi familia cocina junta. También disfrutamos de la pasta y la ensalada. No me gusta mucho la comida picante.",
+gloss:{favorite:"favorita",food:"comida",pizza:"pizza",cheese:"queso",tomatoes:"tomates",weekends:"fines de semana",cooks:"cocina",enjoy:"disfrutar",pasta:"pasta",salad:"ensalada",spicy:"picante"}},
+
+{level:"A", title:"A Trip to the Zoo", en:"Last weekend, I visited the zoo with my class. We saw lions, elephants, and monkeys. The elephants were very big. My favorite animal was the giraffe because it is so tall. It was a fun day.",
+es:"El fin de semana pasado, visité el zoológico con mi clase. Vimos leones, elefantes y monos. Los elefantes eran muy grandes. Mi animal favorito fue la jirafa porque es muy alta. Fue un día divertido.",
+gloss:{last:"pasado",weekend:"fin de semana",visited:"visité",zoo:"zoológico",class:"clase",saw:"vimos",lions:"leones",elephants:"elefantes",monkeys:"monos",big:"grandes",animal:"animal",giraffe:"jirafa",tall:"alta",fun:"divertido",day:"día"}},
+
+{level:"A", title:"My Best Friend", en:"My best friend is called Ana. She lives next to my house. We study in the same class and we play together after school. Ana likes to draw and I like to sing. We always help each other.",
+es:"Mi mejor amiga se llama Ana. Ella vive al lado de mi casa. Estudiamos en la misma clase y jugamos juntos después de la escuela. A Ana le gusta dibujar y a mí me gusta cantar. Siempre nos ayudamos.",
+gloss:{best:"mejor",friend:"amigo/a",called:"llamada",lives:"vive",next:"al lado",same:"misma",study:"estudiar",play:"jugar",after:"después",draw:"dibujar",sing:"cantar",always:"siempre",help:"ayudar"}},
+
+{level:"A", title:"Seasons of the Year", en:"There are four seasons in the year: spring, summer, autumn, and winter. In summer, the days are hot and long. In winter, it is cold and it sometimes snows. I like spring because the flowers grow.",
+es:"Hay cuatro estaciones en el año: primavera, verano, otoño e invierno. En verano, los días son calurosos y largos. En invierno, hace frío y a veces nieva. Me gusta la primavera porque las flores crecen.",
+gloss:{seasons:"estaciones",year:"año",spring:"primavera",summer:"verano",autumn:"otoño",winter:"invierno",days:"días",hot:"caluroso",long:"largo",cold:"frío",sometimes:"a veces",snows:"nieva",grow:"crecer"}},
+
+{level:"A", title:"Colors Around Us", en:"The sky is blue and the grass is green. My favorite color is red because it is bright. My sister likes purple, but my brother likes yellow. We painted our room white last month.",
+es:"El cielo es azul y el pasto es verde. Mi color favorito es el rojo porque es brillante. A mi hermana le gusta el morado, pero a mi hermano le gusta el amarillo. Pintamos nuestra habitación de blanco el mes pasado.",
+gloss:{sky:"cielo",blue:"azul",grass:"pasto",green:"verde",color:"color",red:"rojo",bright:"brillante",purple:"morado",yellow:"amarillo",painted:"pintamos",white:"blanco",month:"mes"}},
+
+{level:"A", title:"A Simple Sport", en:"I play basketball every Friday with my friends. We practice at the school court. My team has five players. Basketball is fun and good exercise. Sometimes we lose, but we always try our best.",
+es:"Juego baloncesto todos los viernes con mis amigos. Practicamos en la cancha de la escuela. Mi equipo tiene cinco jugadores. El baloncesto es divertido y buen ejercicio. A veces perdemos, pero siempre damos lo mejor.",
+gloss:{play:"jugar",basketball:"baloncesto",friday:"viernes",practice:"practicar",court:"cancha",team:"equipo",players:"jugadores",fun:"divertido",exercise:"ejercicio",lose:"perder",try:"intentar",best:"mejor"}},
+
+{level:"A", title:"My Job", en:"I work in a small shop in the city center. I open the shop at nine in the morning and close it at six. I sell clothes and shoes. I like my job because I meet many people.",
+es:"Trabajo en una tienda pequeña en el centro de la ciudad. Abro la tienda a las nueve de la mañana y la cierro a las seis. Vendo ropa y zapatos. Me gusta mi trabajo porque conozco a mucha gente.",
+gloss:{work:"trabajar",shop:"tienda",center:"centro",open:"abrir",nine:"nueve",close:"cerrar",six:"seis",sell:"vender",clothes:"ropa",shoes:"zapatos",job:"trabajo",meet:"conocer"}},
+
+{level:"A", title:"Going Shopping", en:"On Saturdays, my mother and I go shopping. We buy fruit, bread, and milk at the market. Sometimes we also buy new clothes. Shopping with my mother is fun because we talk a lot.",
+es:"Los sábados, mi madre y yo vamos de compras. Compramos fruta, pan y leche en el mercado. A veces también compramos ropa nueva. Ir de compras con mi madre es divertido porque hablamos mucho.",
+gloss:{saturdays:"sábados",shopping:"de compras",buy:"comprar",fruit:"fruta",bread:"pan",milk:"leche",market:"mercado",clothes:"ropa",talk:"hablar",lot:"mucho"}},
+
+{level:"A", title:"A Rainy Day", en:"It is raining outside today. I stay at home and read a book. My little sister watches cartoons on television. Later, we drink hot chocolate together. Rainy days are quiet and calm.",
+es:"Está lloviendo afuera hoy. Me quedo en casa y leo un libro. Mi hermanita ve dibujos animados en la televisión. Más tarde, tomamos chocolate caliente juntos. Los días lluviosos son tranquilos y calmados.",
+gloss:{raining:"lloviendo",outside:"afuera",stay:"quedarse",home:"casa (hogar)",read:"leer",book:"libro",little:"pequeña",watches:"ve",cartoons:"dibujos animados",television:"televisión",later:"más tarde",drink:"tomar",hot:"caliente",chocolate:"chocolate",quiet:"tranquilo",calm:"calmado"}},
+
+{level:"A", title:"My Neighborhood", en:"I live in a quiet neighborhood. There is a park, a bakery, and a small church near my house. My neighbors are friendly. In the evening, children play in the street. I like living here.",
+es:"Vivo en un barrio tranquilo. Hay un parque, una panadería y una pequeña iglesia cerca de mi casa. Mis vecinos son amables. Por la tarde, los niños juegan en la calle. Me gusta vivir aquí.",
+gloss:{neighborhood:"barrio",park:"parque",bakery:"panadería",church:"iglesia",neighbors:"vecinos",friendly:"amables",evening:"tarde/noche",children:"niños",street:"calle",living:"vivir",here:"aquí"}},
+
+{level:"A", title:"A New Pet", en:"Last month, we got a new cat. Her name is Luna and she is very playful. She sleeps a lot during the day and plays at night. My little brother loves to feed her. We are all very happy with Luna.",
+es:"El mes pasado, conseguimos un gato nuevo. Se llama Luna y es muy juguetona. Duerme mucho durante el día y juega por la noche. A mi hermanito le encanta darle de comer. Todos estamos muy felices con Luna.",
+gloss:{got:"conseguimos",cat:"gato",name:"nombre",playful:"juguetona",sleeps:"duerme",during:"durante",plays:"juega",night:"noche",loves:"le encanta",feed:"alimentar",happy:"felices"}},
+
+{level:"A", title:"Morning Routine", en:"I wake up at seven o'clock every day. First, I brush my teeth and take a shower. Then I have breakfast with my family. After that, I get dressed and go to school. I like my morning routine.",
+es:"Me despierto a las siete todos los días. Primero, me cepillo los dientes y me ducho. Luego desayuno con mi familia. Después de eso, me visto y voy a la escuela. Me gusta mi rutina matutina.",
+gloss:{wake:"despertar",seven:"siete",first:"primero",brush:"cepillar",teeth:"dientes",shower:"ducha",breakfast:"desayuno",dressed:"vestido",routine:"rutina",morning:"matutina"}},
+
+{level:"A", title:"A Birthday Party", en:"Yesterday was my sister's birthday. We had a party at home with cake and music. All our cousins came to celebrate. We played games and danced. It was a wonderful day for our family.",
+es:"Ayer fue el cumpleaños de mi hermana. Hicimos una fiesta en casa con pastel y música. Todos nuestros primos vinieron a celebrar. Jugamos juegos y bailamos. Fue un día maravilloso para nuestra familia.",
+gloss:{yesterday:"ayer",birthday:"cumpleaños",party:"fiesta",cake:"pastel",music:"música",cousins:"primos",came:"vinieron",celebrate:"celebrar",games:"juegos",danced:"bailamos",wonderful:"maravilloso"}},
+
+{level:"A", title:"My Favorite Animal", en:"My favorite animal is the dolphin. Dolphins are very intelligent and friendly. They live in the ocean and swim in groups. I saw dolphins once at the beach. It was an amazing moment for me.",
+es:"Mi animal favorito es el delfín. Los delfines son muy inteligentes y amigables. Viven en el océano y nadan en grupos. Vi delfines una vez en la playa. Fue un momento increíble para mí.",
+gloss:{dolphin:"delfín",dolphins:"delfines",intelligent:"inteligentes",friendly:"amigables",ocean:"océano",swim:"nadar",groups:"grupos",beach:"playa",amazing:"increíble",moment:"momento"}},
+
+{level:"A", title:"Learning English", en:"I am learning English at school. It is difficult sometimes, but I practice every day. I watch movies in English and learn new words. My teacher says my English is improving. I want to speak well one day.",
+es:"Estoy aprendiendo inglés en la escuela. A veces es difícil, pero practico todos los días. Veo películas en inglés y aprendo palabras nuevas. Mi maestra dice que mi inglés está mejorando. Quiero hablar bien algún día.",
+gloss:{learning:"aprendiendo",english:"inglés",difficult:"difícil",practice:"practicar",movies:"películas",words:"palabras",says:"dice",improving:"mejorando",speak:"hablar",well:"bien"}},
+
+{level:"A", title:"Going to the Beach", en:"In summer, my family goes to the beach. We swim in the sea and build sandcastles. My father cooks fish for lunch. In the afternoon, we watch the sunset. The beach is my favorite place.",
+es:"En verano, mi familia va a la playa. Nadamos en el mar y construimos castillos de arena. Mi padre cocina pescado para el almuerzo. Por la tarde, vemos la puesta de sol. La playa es mi lugar favorito.",
+gloss:{beach:"playa",summer:"verano",swim:"nadar",sea:"mar",build:"construir",sandcastles:"castillos de arena",cooks:"cocina",fish:"pescado",sunset:"puesta de sol",place:"lugar"}},
+
+/* ---------------- NIVEL B (20) ---------------- */
+{level:"B", title:"Traveling by Train", en:"Last summer, I traveled across the country by train. The journey took almost ten hours, but I enjoyed every moment of it. I met interesting people who shared stories about their lives. Watching the landscape change outside the window was relaxing. By the time I arrived, I felt like I had learned something new about my own country.",
+es:"El verano pasado, viajé por todo el país en tren. El viaje duró casi diez horas, pero disfruté cada momento. Conocí a personas interesantes que compartieron historias sobre sus vidas. Ver cómo cambiaba el paisaje afuera de la ventana era relajante. Para cuando llegué, sentí que había aprendido algo nuevo sobre mi propio país.",
+gloss:{traveled:"viajé",across:"a través de",country:"país",train:"tren",journey:"viaje",took:"tomó",almost:"casi",hours:"horas",enjoyed:"disfruté",moment:"momento",met:"conocí",interesting:"interesantes",shared:"compartieron",stories:"historias",lives:"vidas",watching:"ver",landscape:"paisaje",change:"cambiar",window:"ventana",relaxing:"relajante",arrived:"llegué",felt:"sentí",learned:"aprendido"}},
+
+{level:"B", title:"The Importance of Recycling", en:"Recycling has become an important habit in many communities. When people separate their trash correctly, less waste ends up in landfills. Factories can then reuse materials such as glass, paper, and plastic to make new products. Although recycling requires effort, it helps protect the environment for future generations. Small actions, when repeated by many people, can make a big difference.",
+es:"El reciclaje se ha convertido en un hábito importante en muchas comunidades. Cuando las personas separan su basura correctamente, menos residuos terminan en los vertederos. Las fábricas pueden entonces reutilizar materiales como vidrio, papel y plástico para hacer nuevos productos. Aunque el reciclaje requiere esfuerzo, ayuda a proteger el medio ambiente para las generaciones futuras. Pequeñas acciones, cuando se repiten por muchas personas, pueden marcar una gran diferencia.",
+gloss:{recycling:"reciclaje",become:"convertirse",important:"importante",habit:"hábito",communities:"comunidades",separate:"separan",trash:"basura",correctly:"correctamente",waste:"residuos",ends:"termina",landfills:"vertederos",factories:"fábricas",reuse:"reutilizar",materials:"materiales",glass:"vidrio",paper:"papel",plastic:"plástico",products:"productos",requires:"requiere",effort:"esfuerzo",protect:"proteger",environment:"medio ambiente",future:"futuras",generations:"generaciones",actions:"acciones",repeated:"repetidas",difference:"diferencia"}},
+
+{level:"B", title:"A Job Interview", en:"Yesterday, I had my first job interview at a marketing company. I was nervous at first, but the interviewer was friendly and made me feel comfortable. She asked about my previous experience and my strengths. I explained that I had worked on several team projects during university. By the end of the interview, I felt more confident about my chances of getting the position.",
+es:"Ayer, tuve mi primera entrevista de trabajo en una empresa de marketing. Al principio estaba nervioso, pero la entrevistadora fue amable y me hizo sentir cómodo. Me preguntó sobre mi experiencia previa y mis fortalezas. Le expliqué que había trabajado en varios proyectos en equipo durante la universidad. Al final de la entrevista, me sentí más seguro sobre mis posibilidades de conseguir el puesto.",
+gloss:{interview:"entrevista",marketing:"marketing",company:"empresa",nervous:"nervioso",interviewer:"entrevistadora",comfortable:"cómodo",asked:"preguntó",previous:"previa",experience:"experiencia",strengths:"fortalezas",explained:"expliqué",worked:"trabajado",several:"varios",team:"equipo",projects:"proyectos",university:"universidad",confident:"seguro",chances:"posibilidades",position:"puesto"}},
+
+{level:"B", title:"Social Media and Friendship", en:"Social media has changed the way people maintain friendships. Nowadays, it is easy to stay in touch with friends who live far away, thanks to messaging apps and video calls. However, some experts argue that online communication cannot fully replace face-to-face conversations. Spending too much time on screens may actually make people feel more isolated. Finding a balance between digital and real-life interaction seems essential.",
+es:"Las redes sociales han cambiado la forma en que las personas mantienen sus amistades. Hoy en día, es fácil mantenerse en contacto con amigos que viven lejos, gracias a las aplicaciones de mensajería y las videollamadas. Sin embargo, algunos expertos argumentan que la comunicación en línea no puede reemplazar completamente las conversaciones cara a cara. Pasar demasiado tiempo frente a las pantallas puede en realidad hacer que las personas se sientan más aisladas. Encontrar un equilibrio entre la interacción digital y la real parece esencial.",
+gloss:{social:"social",media:"medios",changed:"cambiado",maintain:"mantener",friendships:"amistades",nowadays:"hoy en día",touch:"contacto",far:"lejos",thanks:"gracias",messaging:"mensajería",apps:"aplicaciones",video:"video",calls:"llamadas",however:"sin embargo",experts:"expertos",argue:"argumentan",online:"en línea",communication:"comunicación",replace:"reemplazar",face:"cara",conversations:"conversaciones",spending:"pasar",screens:"pantallas",isolated:"aisladas",finding:"encontrar",balance:"equilibrio",digital:"digital",interaction:"interacción",essential:"esencial"}},
+
+{level:"B", title:"Learning a Musical Instrument", en:"Learning to play a musical instrument requires patience and consistent practice. Many beginners feel frustrated because progress can be slow at first. However, with regular practice, even complicated pieces become easier to play. Music also helps improve memory and concentration. For these reasons, many teachers recommend that children start learning an instrument at a young age.",
+es:"Aprender a tocar un instrumento musical requiere paciencia y práctica constante. Muchos principiantes se sienten frustrados porque el progreso puede ser lento al principio. Sin embargo, con práctica regular, incluso las piezas complicadas se vuelven más fáciles de tocar. La música también ayuda a mejorar la memoria y la concentración. Por estas razones, muchos maestros recomiendan que los niños empiecen a aprender un instrumento a una edad temprana.",
+gloss:{instrument:"instrumento",requires:"requiere",patience:"paciencia",consistent:"constante",practice:"práctica",beginners:"principiantes",frustrated:"frustrados",progress:"progreso",slow:"lento",regular:"regular",complicated:"complicadas",pieces:"piezas",easier:"más fácil",memory:"memoria",concentration:"concentración",reasons:"razones",recommend:"recomiendan",young:"temprana",age:"edad"}},
+
+{level:"B", title:"City Life vs. Country Life", en:"Living in a big city offers many advantages, such as job opportunities and entertainment options. On the other hand, life in the countryside tends to be quieter and closer to nature. People who live in rural areas often say they have a stronger sense of community. Meanwhile, city dwellers value convenience and access to modern services. Choosing between the two depends largely on personal priorities.",
+es:"Vivir en una gran ciudad ofrece muchas ventajas, como oportunidades laborales y opciones de entretenimiento. Por otro lado, la vida en el campo tiende a ser más tranquila y más cercana a la naturaleza. Las personas que viven en áreas rurales a menudo dicen que tienen un sentido de comunidad más fuerte. Mientras tanto, los habitantes de la ciudad valoran la conveniencia y el acceso a servicios modernos. Elegir entre las dos opciones depende en gran medida de las prioridades personales.",
+gloss:{living:"vivir",advantages:"ventajas",opportunities:"oportunidades",entertainment:"entretenimiento",options:"opciones",countryside:"campo",tends:"tiende",quieter:"más tranquila",closer:"más cercana",nature:"naturaleza",rural:"rural",areas:"áreas",stronger:"más fuerte",sense:"sentido",community:"comunidad",meanwhile:"mientras tanto",dwellers:"habitantes",value:"valoran",convenience:"conveniencia",access:"acceso",modern:"modernos",services:"servicios",choosing:"elegir",depends:"depende",largely:"en gran medida",priorities:"prioridades"}},
+
+{level:"B", title:"The Benefits of Reading", en:"Reading regularly offers many benefits beyond simple entertainment. It expands vocabulary, improves focus, and strengthens critical thinking skills. Studies show that people who read often tend to perform better academically. In addition, reading fiction can increase empathy by allowing readers to imagine other people's experiences. Despite the popularity of digital entertainment, books remain a powerful tool for personal growth.",
+es:"Leer regularmente ofrece muchos beneficios más allá del simple entretenimiento. Expande el vocabulario, mejora la concentración y fortalece las habilidades de pensamiento crítico. Los estudios muestran que las personas que leen a menudo tienden a rendir mejor académicamente. Además, leer ficción puede aumentar la empatía al permitir que los lectores imaginen las experiencias de otras personas. A pesar de la popularidad del entretenimiento digital, los libros siguen siendo una herramienta poderosa para el crecimiento personal.",
+gloss:{reading:"leer",regularly:"regularmente",benefits:"beneficios",beyond:"más allá",entertainment:"entretenimiento",expands:"expande",vocabulary:"vocabulario",improves:"mejora",focus:"concentración",strengthens:"fortalece",critical:"crítico",thinking:"pensamiento",skills:"habilidades",studies:"estudios",perform:"rendir",academically:"académicamente",fiction:"ficción",increase:"aumentar",empathy:"empatía",allowing:"permitir",readers:"lectores",imagine:"imaginar",experiences:"experiencias",despite:"a pesar de",popularity:"popularidad",books:"libros",remain:"siguen siendo",powerful:"poderosa",tool:"herramienta",growth:"crecimiento"}},
+
+{level:"B", title:"Healthy Eating Habits", en:"Developing healthy eating habits can improve both physical and mental health. Nutritionists recommend eating a variety of fruits, vegetables, and whole grains every day. It is also important to drink enough water and limit processed foods. Many people struggle to maintain a balanced diet because of busy schedules. Nevertheless, small changes, like preparing meals in advance, can make healthy eating more manageable.",
+es:"Desarrollar hábitos alimenticios saludables puede mejorar tanto la salud física como la mental. Los nutricionistas recomiendan comer una variedad de frutas, verduras y granos integrales todos los días. También es importante beber suficiente agua y limitar los alimentos procesados. Muchas personas tienen dificultades para mantener una dieta equilibrada debido a los horarios ocupados. Sin embargo, pequeños cambios, como preparar las comidas con anticipación, pueden hacer que comer sano sea más manejable.",
+gloss:{developing:"desarrollar",healthy:"saludables",eating:"alimenticios",habits:"hábitos",physical:"física",mental:"mental",nutritionists:"nutricionistas",variety:"variedad",fruits:"frutas",vegetables:"verduras",whole:"integrales",grains:"granos",enough:"suficiente",water:"agua",limit:"limitar",processed:"procesados",foods:"alimentos",struggle:"tienen dificultades",maintain:"mantener",balanced:"equilibrada",diet:"dieta",busy:"ocupados",schedules:"horarios",nevertheless:"sin embargo",changes:"cambios",preparing:"preparar",meals:"comidas",advance:"anticipación",manageable:"manejable"}},
+
+{level:"B", title:"The Rise of Remote Work", en:"Remote work has become increasingly popular since the pandemic changed how companies operate. Many employees now enjoy the flexibility of working from home instead of commuting daily. However, remote work also presents challenges, such as feelings of isolation and difficulty separating personal life from professional responsibilities. Companies are trying to find solutions, including virtual team-building activities and clear communication guidelines, to keep employees engaged.",
+es:"El trabajo remoto se ha vuelto cada vez más popular desde que la pandemia cambió la forma en que operan las empresas. Muchos empleados ahora disfrutan de la flexibilidad de trabajar desde casa en lugar de desplazarse diariamente. Sin embargo, el trabajo remoto también presenta desafíos, como sentimientos de aislamiento y dificultad para separar la vida personal de las responsabilidades profesionales. Las empresas están tratando de encontrar soluciones, incluyendo actividades virtuales de trabajo en equipo y pautas de comunicación claras, para mantener a los empleados comprometidos.",
+gloss:{remote:"remoto",work:"trabajo",increasingly:"cada vez más",popular:"popular",pandemic:"pandemia",changed:"cambió",companies:"empresas",operate:"operan",employees:"empleados",flexibility:"flexibilidad",working:"trabajar",commuting:"desplazarse",daily:"diariamente",presents:"presenta",challenges:"desafíos",feelings:"sentimientos",isolation:"aislamiento",difficulty:"dificultad",separating:"separar",personal:"personal",professional:"profesionales",responsibilities:"responsabilidades",trying:"tratando",solutions:"soluciones",including:"incluyendo",virtual:"virtuales",activities:"actividades",guidelines:"pautas",engaged:"comprometidos"}},
+
+{level:"B", title:"Preparing for a Marathon", en:"Training for a marathon takes months of careful preparation. Runners usually follow a schedule that gradually increases their weekly distance. Proper nutrition and rest are just as important as the training itself. Many first-time runners underestimate how much mental strength is needed to finish twenty-six miles. On race day, crossing the finish line often feels like an unforgettable achievement.",
+es:"Entrenar para un maratón lleva meses de cuidadosa preparación. Los corredores generalmente siguen un horario que aumenta gradualmente su distancia semanal. La nutrición adecuada y el descanso son tan importantes como el entrenamiento en sí. Muchos corredores primerizos subestiman cuánta fortaleza mental se necesita para terminar veintiséis millas. El día de la carrera, cruzar la línea de meta a menudo se siente como un logro inolvidable.",
+gloss:{training:"entrenar",marathon:"maratón",takes:"lleva",months:"meses",careful:"cuidadosa",preparation:"preparación",runners:"corredores",follow:"siguen",schedule:"horario",gradually:"gradualmente",increases:"aumenta",weekly:"semanal",distance:"distancia",proper:"adecuada",nutrition:"nutrición",rest:"descanso",itself:"en sí",underestimate:"subestiman",strength:"fortaleza",needed:"necesita",finish:"terminar",miles:"millas",race:"carrera",crossing:"cruzar",line:"línea",unforgettable:"inolvidable",achievement:"logro"}},
+
+{level:"B", title:"The History of Coffee", en:"Coffee has a long and interesting history that began centuries ago in Ethiopia. According to legend, a goat herder noticed his goats becoming energetic after eating certain berries. Eventually, coffee spread through the Arab world and later reached Europe. Today, coffee is one of the most traded products in the world. Millions of people start their day with a cup of coffee, often without knowing its origins.",
+es:"El café tiene una historia larga e interesante que comenzó hace siglos en Etiopía. Según la leyenda, un pastor de cabras notó que sus cabras se volvían enérgicas después de comer ciertas bayas. Con el tiempo, el café se extendió por el mundo árabe y luego llegó a Europa. Hoy, el café es uno de los productos más comercializados del mundo. Millones de personas comienzan su día con una taza de café, a menudo sin conocer sus orígenes.",
+gloss:{coffee:"café",long:"larga",history:"historia",began:"comenzó",centuries:"siglos",ago:"hace",ethiopia:"Etiopía",legend:"leyenda",goat:"cabra",herder:"pastor",noticed:"notó",goats:"cabras",becoming:"volviéndose",energetic:"enérgicas",berries:"bayas",eventually:"con el tiempo",spread:"se extendió",arab:"árabe",world:"mundo",later:"luego",reached:"llegó",europe:"Europa",traded:"comercializados",products:"productos",millions:"millones",cup:"taza",origins:"orígenes"}},
+
+{level:"B", title:"Climate and Agriculture", en:"Farmers around the world are noticing changes in weather patterns that affect their crops. Unpredictable rainfall and rising temperatures make it harder to plan planting seasons. Some farmers are adapting by using drought-resistant seeds or new irrigation techniques. Scientists warn that without significant changes, food production could decline in many regions. Supporting sustainable farming practices is becoming increasingly urgent.",
+es:"Los agricultores de todo el mundo están notando cambios en los patrones climáticos que afectan sus cultivos. Las lluvias impredecibles y las temperaturas en aumento hacen más difícil planificar las temporadas de siembra. Algunos agricultores se están adaptando usando semillas resistentes a la sequía o nuevas técnicas de riego. Los científicos advierten que, sin cambios significativos, la producción de alimentos podría disminuir en muchas regiones. Apoyar las prácticas agrícolas sostenibles se está volviendo cada vez más urgente.",
+gloss:{farmers:"agricultores",noticing:"notando",patterns:"patrones",affect:"afectan",crops:"cultivos",unpredictable:"impredecibles",rainfall:"lluvias",rising:"en aumento",temperatures:"temperaturas",harder:"más difícil",planning:"planificar",planting:"siembra",adapting:"adaptando",drought:"sequía",resistant:"resistentes",seeds:"semillas",irrigation:"riego",techniques:"técnicas",scientists:"científicos",warn:"advierten",significant:"significativos",production:"producción",decline:"disminuir",regions:"regiones",supporting:"apoyar",sustainable:"sostenibles",farming:"agrícolas",practices:"prácticas",urgent:"urgente"}},
+
+{level:"B", title:"Adjusting to a New Culture", en:"Moving to a new country can be an exciting but challenging experience. At first, many people struggle with the language barrier and unfamiliar customs. Homesickness is common during the first few months of living abroad. Over time, however, most people begin to adapt and even appreciate the differences between cultures. Making local friends often speeds up this process of adjustment significantly.",
+es:"Mudarse a un nuevo país puede ser una experiencia emocionante pero desafiante. Al principio, muchas personas luchan con la barrera del idioma y las costumbres desconocidas. La nostalgia es común durante los primeros meses de vivir en el extranjero. Con el tiempo, sin embargo, la mayoría de las personas comienza a adaptarse e incluso a apreciar las diferencias entre culturas. Hacer amigos locales a menudo acelera significativamente este proceso de adaptación.",
+gloss:{moving:"mudarse",exciting:"emocionante",challenging:"desafiante",struggle:"luchan",language:"idioma",barrier:"barrera",unfamiliar:"desconocidas",customs:"costumbres",homesickness:"nostalgia",common:"común",abroad:"en el extranjero",adapt:"adaptarse",appreciate:"apreciar",differences:"diferencias",cultures:"culturas",local:"locales",speeds:"acelera",process:"proceso",adjustment:"adaptación",significantly:"significativamente"}},
+
+{level:"B", title:"The Value of Volunteering", en:"Volunteering offers benefits not only to the community but also to the volunteers themselves. People who volunteer regularly often report feeling more satisfied with their lives. It also provides an opportunity to develop new skills and meet people from different backgrounds. Some companies now encourage employees to volunteer as part of their professional development. Ultimately, giving time to others can create a lasting positive impact.",
+es:"El voluntariado ofrece beneficios no solo a la comunidad sino también a los propios voluntarios. Las personas que hacen voluntariado regularmente a menudo reportan sentirse más satisfechas con sus vidas. También proporciona una oportunidad para desarrollar nuevas habilidades y conocer personas de diferentes orígenes. Algunas empresas ahora animan a los empleados a hacer voluntariado como parte de su desarrollo profesional. En última instancia, dar tiempo a otros puede crear un impacto positivo duradero.",
+gloss:{volunteering:"voluntariado",offers:"ofrece",benefits:"beneficios",community:"comunidad",volunteers:"voluntarios",themselves:"ellos mismos",satisfied:"satisfechas",provides:"proporciona",opportunity:"oportunidad",develop:"desarrollar",skills:"habilidades",backgrounds:"orígenes",encourage:"animan",employees:"empleados",professional:"profesional",development:"desarrollo",ultimately:"en última instancia",giving:"dar",lasting:"duradero",positive:"positivo",impact:"impacto"}},
+
+{level:"B", title:"Understanding Sleep", en:"Sleep plays a crucial role in maintaining both physical and mental well-being. During sleep, the body repairs tissues and the brain processes information from the day. Adults typically need between seven and nine hours of sleep each night. Unfortunately, many people do not get enough rest due to stress or excessive screen time. Poor sleep habits have been linked to problems such as memory loss and weakened immunity.",
+es:"El sueño juega un papel crucial en el mantenimiento del bienestar físico y mental. Durante el sueño, el cuerpo repara los tejidos y el cerebro procesa la información del día. Los adultos generalmente necesitan entre siete y nueve horas de sueño cada noche. Desafortunadamente, muchas personas no descansan lo suficiente debido al estrés o al tiempo excesivo frente a pantallas. Los malos hábitos de sueño se han relacionado con problemas como la pérdida de memoria y la debilidad del sistema inmunológico.",
+gloss:{sleep:"sueño",plays:"juega",crucial:"crucial",role:"papel",maintaining:"mantenimiento",wellbeing:"bienestar",repairs:"repara",tissues:"tejidos",brain:"cerebro",processes:"procesa",information:"información",adults:"adultos",typically:"generalmente",unfortunately:"desafortunadamente",rest:"descanso",due:"debido",stress:"estrés",excessive:"excesivo",screen:"pantalla",poor:"malos",linked:"relacionado",problems:"problemas",loss:"pérdida",weakened:"debilidad",immunity:"sistema inmunológico"}},
+
+{level:"B", title:"The Growth of Online Shopping", en:"Online shopping has transformed the way people buy goods around the world. Consumers now enjoy the convenience of ordering products from home and having them delivered within days. At the same time, small local businesses often struggle to compete with large online retailers. Some shoppers worry about the environmental impact of frequent deliveries and excessive packaging. Despite these concerns, online shopping continues to grow every year.",
+es:"Las compras en línea han transformado la forma en que las personas compran productos en todo el mundo. Los consumidores ahora disfrutan de la conveniencia de pedir productos desde casa y recibirlos en pocos días. Al mismo tiempo, los pequeños negocios locales a menudo tienen dificultades para competir con los grandes minoristas en línea. Algunos compradores se preocupan por el impacto ambiental de las entregas frecuentes y el exceso de empaques. A pesar de estas preocupaciones, las compras en línea siguen creciendo cada año.",
+gloss:{online:"en línea",shopping:"compras",transformed:"transformado",goods:"productos",consumers:"consumidores",convenience:"conveniencia",ordering:"pedir",delivered:"entregados",within:"dentro de",businesses:"negocios",struggle:"tienen dificultades",compete:"competir",retailers:"minoristas",shoppers:"compradores",worry:"se preocupan",environmental:"ambiental",impact:"impacto",frequent:"frecuentes",deliveries:"entregas",packaging:"empaques",concerns:"preocupaciones",grow:"crecer"}},
+
+{level:"B", title:"Learning from Mistakes", en:"Making mistakes is a natural part of learning and personal growth. Instead of feeling discouraged, successful people often analyze what went wrong and adjust their approach. Teachers now encourage students to view failure as a valuable learning opportunity rather than something to fear. Research suggests that people who reflect on their mistakes tend to improve faster than those who avoid them. Ultimately, embracing failure can lead to greater resilience.",
+es:"Cometer errores es una parte natural del aprendizaje y el crecimiento personal. En lugar de sentirse desanimadas, las personas exitosas a menudo analizan qué salió mal y ajustan su enfoque. Los maestros ahora animan a los estudiantes a ver el fracaso como una valiosa oportunidad de aprendizaje en lugar de algo a temer. Las investigaciones sugieren que las personas que reflexionan sobre sus errores tienden a mejorar más rápido que quienes los evitan. En última instancia, aceptar el fracaso puede llevar a una mayor resiliencia.",
+gloss:{mistakes:"errores",natural:"natural",growth:"crecimiento",discouraged:"desanimadas",successful:"exitosas",analyze:"analizan",wrong:"mal",adjust:"ajustan",approach:"enfoque",encourage:"animan",students:"estudiantes",view:"ver",failure:"fracaso",valuable:"valiosa",opportunity:"oportunidad",fear:"temer",research:"investigaciones",suggests:"sugieren",reflect:"reflexionan",improve:"mejorar",faster:"más rápido",avoid:"evitan",embracing:"aceptar",lead:"llevar",greater:"mayor",resilience:"resiliencia"}},
+
+{level:"B", title:"The Role of Music in Movies", en:"Music plays a powerful role in shaping the emotional impact of a film. A well-chosen soundtrack can make a scene feel more exciting, sad, or suspenseful. Composers work closely with directors to ensure that the music matches the story's tone. Some famous film scores have become just as memorable as the movies themselves. Without music, many iconic scenes would lose much of their emotional power.",
+es:"La música juega un papel poderoso en dar forma al impacto emocional de una película. Una banda sonora bien elegida puede hacer que una escena se sienta más emocionante, triste o de suspenso. Los compositores trabajan de cerca con los directores para asegurar que la música coincida con el tono de la historia. Algunas bandas sonoras famosas se han vuelto tan memorables como las propias películas. Sin música, muchas escenas icónicas perderían gran parte de su poder emocional.",
+gloss:{music:"música",powerful:"poderoso",role:"papel",shaping:"dar forma",emotional:"emocional",impact:"impacto",film:"película",soundtrack:"banda sonora",scene:"escena",exciting:"emocionante",sad:"triste",suspenseful:"de suspenso",composers:"compositores",closely:"de cerca",directors:"directores",ensure:"asegurar",matches:"coincida",story:"historia",tone:"tono",famous:"famosas",scores:"bandas sonoras",memorable:"memorables",iconic:"icónicas",scenes:"escenas",lose:"perderían",power:"poder"}},
+
+{level:"B", title:"Public Transportation in Big Cities", en:"Efficient public transportation is essential for reducing traffic congestion in large cities. Buses, trains, and subways allow thousands of people to travel without using private cars. Cities that invest in reliable public transport often see improvements in air quality. However, aging infrastructure and limited funding remain major challenges for many transit systems. Encouraging more people to use public transportation requires both better service and changes in habits.",
+es:"El transporte público eficiente es esencial para reducir la congestión del tráfico en las grandes ciudades. Los autobuses, trenes y metros permiten que miles de personas viajen sin usar autos privados. Las ciudades que invierten en transporte público confiable a menudo ven mejoras en la calidad del aire. Sin embargo, la infraestructura envejecida y el financiamiento limitado siguen siendo grandes desafíos para muchos sistemas de tránsito. Animar a más personas a usar el transporte público requiere tanto un mejor servicio como cambios en los hábitos.",
+gloss:{efficient:"eficiente",public:"público",transportation:"transporte",essential:"esencial",reducing:"reducir",traffic:"tráfico",congestion:"congestión",buses:"autobuses",trains:"trenes",subways:"metros",thousands:"miles",travel:"viajen",private:"privados",cars:"autos",invest:"invierten",reliable:"confiable",improvements:"mejoras",air:"aire",quality:"calidad",aging:"envejecida",infrastructure:"infraestructura",limited:"limitado",funding:"financiamiento",major:"grandes",challenges:"desafíos",transit:"tránsito",systems:"sistemas",encouraging:"animar",requires:"requiere",service:"servicio",habits:"hábitos"}},
+
+{level:"B", title:"Why People Fear Public Speaking", en:"Public speaking is one of the most common fears among adults, even more than fear of heights or spiders. Many people feel anxious about being judged or making a mistake in front of an audience. Experts suggest that practicing regularly and preparing thoroughly can reduce this anxiety significantly. Joining groups such as public speaking clubs also helps people build confidence over time. With enough practice, even the most nervous speakers can become effective communicators.",
+es:"Hablar en público es uno de los miedos más comunes entre los adultos, incluso más que el miedo a las alturas o a las arañas. Muchas personas se sienten ansiosas por ser juzgadas o cometer un error frente a una audiencia. Los expertos sugieren que practicar regularmente y prepararse a fondo puede reducir significativamente esta ansiedad. Unirse a grupos como clubes de oratoria también ayuda a las personas a ganar confianza con el tiempo. Con suficiente práctica, incluso los oradores más nerviosos pueden convertirse en comunicadores efectivos.",
+gloss:{speaking:"hablar",common:"comunes",fears:"miedos",adults:"adultos",heights:"alturas",spiders:"arañas",anxious:"ansiosas",judged:"juzgadas",mistake:"error",front:"frente",audience:"audiencia",experts:"expertos",suggest:"sugieren",practicing:"practicar",thoroughly:"a fondo",reduce:"reducir",anxiety:"ansiedad",joining:"unirse",clubs:"clubes",confidence:"confianza",nervous:"nerviosos",speakers:"oradores",effective:"efectivos",communicators:"comunicadores"}},
+
+/* ---------------- NIVEL C (20) ---------------- */
+{level:"C", title:"The Ethics of Artificial Intelligence", en:"As artificial intelligence systems become more capable, questions about their ethical implications grow increasingly urgent. Developers must grapple with issues such as algorithmic bias, accountability, and the potential displacement of human labor. Some argue that regulation should keep pace with technological innovation to prevent misuse, while others fear that excessive restrictions could stifle beneficial advances. Striking the right balance requires collaboration among technologists, policymakers, and ethicists. Ultimately, the decisions made today will shape how artificial intelligence integrates into society for generations to come.",
+es:"A medida que los sistemas de inteligencia artificial se vuelven más capaces, las preguntas sobre sus implicaciones éticas se vuelven cada vez más urgentes. Los desarrolladores deben lidiar con cuestiones como el sesgo algorítmico, la responsabilidad y el posible desplazamiento de la mano de obra humana. Algunos argumentan que la regulación debería mantener el ritmo de la innovación tecnológica para prevenir el mal uso, mientras que otros temen que restricciones excesivas puedan frenar avances beneficiosos. Encontrar el equilibrio adecuado requiere colaboración entre tecnólogos, responsables políticos y especialistas en ética. En última instancia, las decisiones que se tomen hoy determinarán cómo la inteligencia artificial se integra en la sociedad durante generaciones.",
+gloss:{artificial:"artificial",intelligence:"inteligencia",systems:"sistemas",capable:"capaces",ethical:"éticas",implications:"implicaciones",urgent:"urgentes",developers:"desarrolladores",grapple:"lidiar",issues:"cuestiones",algorithmic:"algorítmico",bias:"sesgo",accountability:"responsabilidad",potential:"posible",displacement:"desplazamiento",labor:"mano de obra",argue:"argumentan",regulation:"regulación",pace:"ritmo",technological:"tecnológica",innovation:"innovación",prevent:"prevenir",misuse:"mal uso",fear:"temen",excessive:"excesivas",restrictions:"restricciones",stifle:"frenar",beneficial:"beneficiosos",advances:"avances",striking:"encontrar",balance:"equilibrio",collaboration:"colaboración",technologists:"tecnólogos",policymakers:"responsables políticos",ethicists:"especialistas en ética",decisions:"decisiones",shape:"determinarán",integrates:"se integra",society:"sociedad",generations:"generaciones"}},
+
+{level:"C", title:"Globalization and Cultural Identity", en:"Globalization has undeniably connected economies and cultures across the world, facilitating unprecedented exchange of goods, ideas, and information. However, critics argue that this interconnectedness sometimes comes at the expense of local traditions and languages, which risk being overshadowed by dominant global cultures. Proponents counter that globalization allows smaller cultures to reach wider audiences and preserve their heritage through digital platforms. The tension between homogenization and diversity remains a central debate in discussions about globalization's long-term impact on identity.",
+es:"La globalización ha conectado innegablemente economías y culturas en todo el mundo, facilitando un intercambio sin precedentes de bienes, ideas e información. Sin embargo, los críticos argumentan que esta interconexión a veces ocurre a costa de las tradiciones y lenguas locales, que corren el riesgo de quedar eclipsadas por culturas globales dominantes. Los defensores contraargumentan que la globalización permite que culturas más pequeñas lleguen a audiencias más amplias y preserven su patrimonio a través de plataformas digitales. La tensión entre la homogeneización y la diversidad sigue siendo un debate central en las discusiones sobre el impacto a largo plazo de la globalización en la identidad.",
+gloss:{globalization:"globalización",undeniably:"innegablemente",connected:"conectado",economies:"economías",cultures:"culturas",facilitating:"facilitando",unprecedented:"sin precedentes",exchange:"intercambio",goods:"bienes",ideas:"ideas",critics:"críticos",interconnectedness:"interconexión",expense:"costa",traditions:"tradiciones",languages:"lenguas",risk:"riesgo",overshadowed:"eclipsadas",dominant:"dominantes",global:"globales",proponents:"defensores",counter:"contraargumentan",smaller:"más pequeñas",wider:"más amplias",audiences:"audiencias",preserve:"preserven",heritage:"patrimonio",digital:"digitales",platforms:"plataformas",tension:"tensión",homogenization:"homogeneización",diversity:"diversidad",remains:"sigue siendo",central:"central",debate:"debate",discussions:"discusiones",identity:"identidad"}},
+
+{level:"C", title:"The Psychology of Procrastination", en:"Procrastination is often misunderstood as simple laziness, but psychologists suggest it is closely linked to emotional regulation rather than time management. People tend to delay tasks that provoke anxiety, boredom, or self-doubt, choosing short-term relief over long-term goals. This pattern can create a vicious cycle, as the resulting guilt and stress make future tasks even harder to approach. Cognitive behavioral techniques, such as breaking tasks into smaller steps, have proven effective in helping individuals overcome chronic procrastination. Understanding the emotional roots of this behavior is essential for developing lasting solutions.",
+es:"La procrastinación a menudo se malinterpreta como simple pereza, pero los psicólogos sugieren que está estrechamente relacionada con la regulación emocional más que con la gestión del tiempo. Las personas tienden a posponer tareas que provocan ansiedad, aburrimiento o inseguridad, eligiendo el alivio a corto plazo por encima de las metas a largo plazo. Este patrón puede crear un círculo vicioso, ya que la culpa y el estrés resultantes hacen que las tareas futuras sean aún más difíciles de abordar. Las técnicas cognitivo-conductuales, como dividir las tareas en pasos más pequeños, han demostrado ser efectivas para ayudar a las personas a superar la procrastinación crónica. Comprender las raíces emocionales de este comportamiento es esencial para desarrollar soluciones duraderas.",
+gloss:{procrastination:"procrastinación",misunderstood:"malinterpretada",laziness:"pereza",psychologists:"psicólogos",closely:"estrechamente",linked:"relacionada",emotional:"emocional",regulation:"regulación",management:"gestión",delay:"posponer",tasks:"tareas",provoke:"provocan",anxiety:"ansiedad",boredom:"aburrimiento",doubt:"inseguridad",choosing:"eligiendo",relief:"alivio",goals:"metas",pattern:"patrón",vicious:"vicioso",cycle:"círculo",resulting:"resultante",guilt:"culpa",stress:"estrés",harder:"más difíciles",approach:"abordar",cognitive:"cognitivo",behavioral:"conductuales",techniques:"técnicas",breaking:"dividir",steps:"pasos",proven:"demostrado",effective:"efectivas",individuals:"individuos",overcome:"superar",chronic:"crónica",roots:"raíces",behavior:"comportamiento",lasting:"duraderas",solutions:"soluciones"}},
+
+{level:"C", title:"The Future of Renewable Energy", en:"As concerns about climate change intensify, renewable energy sources such as solar and wind power are gaining prominence worldwide. Governments and private companies are investing heavily in infrastructure to reduce dependence on fossil fuels. Despite significant progress, challenges remain, including the intermittent nature of renewable sources and the need for improved energy storage technology. Some experts argue that a diversified energy portfolio, combining multiple renewable sources with advanced grid management, offers the most realistic path toward sustainability. The transition, though costly in the short term, is widely regarded as essential for long-term environmental stability.",
+es:"A medida que se intensifican las preocupaciones sobre el cambio climático, las fuentes de energía renovable como la solar y la eólica están ganando prominencia en todo el mundo. Los gobiernos y las empresas privadas están invirtiendo fuertemente en infraestructura para reducir la dependencia de los combustibles fósiles. A pesar de un progreso significativo, persisten desafíos, incluyendo la naturaleza intermitente de las fuentes renovables y la necesidad de una mejor tecnología de almacenamiento de energía. Algunos expertos argumentan que una cartera energética diversificada, que combine múltiples fuentes renovables con una gestión avanzada de la red, ofrece el camino más realista hacia la sostenibilidad. La transición, aunque costosa a corto plazo, se considera ampliamente esencial para la estabilidad ambiental a largo plazo.",
+gloss:{concerns:"preocupaciones",climate:"clima",intensify:"se intensifican",renewable:"renovable",energy:"energía",sources:"fuentes",solar:"solar",wind:"eólica",power:"energía",gaining:"ganando",prominence:"prominencia",worldwide:"en todo el mundo",governments:"gobiernos",private:"privadas",investing:"invirtiendo",heavily:"fuertemente",infrastructure:"infraestructura",dependence:"dependencia",fossil:"fósiles",fuels:"combustibles",progress:"progreso",challenges:"desafíos",intermittent:"intermitente",nature:"naturaleza",storage:"almacenamiento",technology:"tecnología",diversified:"diversificada",portfolio:"cartera",combining:"combinar",multiple:"múltiples",advanced:"avanzada",grid:"red",management:"gestión",realistic:"realista",path:"camino",sustainability:"sostenibilidad",transition:"transición",costly:"costosa",widely:"ampliamente",regarded:"considerada",stability:"estabilidad"}},
+
+{level:"C", title:"Urbanization and Its Consequences", en:"Rapid urbanization has transformed cities into densely populated centers of economic activity, but this growth has not come without significant costs. Housing shortages, traffic congestion, and pollution are common challenges faced by expanding urban areas. Furthermore, the gap between wealthy and impoverished neighborhoods often widens as cities grow, exacerbating social inequality. Urban planners increasingly emphasize the importance of sustainable development, including green spaces and efficient public transportation, to mitigate these negative effects. Successfully managing urbanization requires long-term vision and coordinated policy across multiple sectors.",
+es:"La rápida urbanización ha transformado las ciudades en centros densamente poblados de actividad económica, pero este crecimiento no ha llegado sin costos significativos. La escasez de vivienda, la congestión del tráfico y la contaminación son desafíos comunes que enfrentan las áreas urbanas en expansión. Además, la brecha entre los vecindarios ricos y empobrecidos a menudo se amplía a medida que crecen las ciudades, exacerbando la desigualdad social. Los planificadores urbanos enfatizan cada vez más la importancia del desarrollo sostenible, incluyendo espacios verdes y transporte público eficiente, para mitigar estos efectos negativos. Gestionar exitosamente la urbanización requiere una visión a largo plazo y políticas coordinadas entre múltiples sectores.",
+gloss:{rapid:"rápida",urbanization:"urbanización",transformed:"transformado",densely:"densamente",populated:"poblados",centers:"centros",economic:"económica",growth:"crecimiento",costs:"costos",housing:"vivienda",shortages:"escasez",congestion:"congestión",pollution:"contaminación",common:"comunes",faced:"enfrentan",expanding:"en expansión",urban:"urbanas",furthermore:"además",gap:"brecha",wealthy:"ricos",impoverished:"empobrecidos",neighborhoods:"vecindarios",widens:"se amplía",exacerbating:"exacerbando",inequality:"desigualdad",planners:"planificadores",emphasize:"enfatizan",sustainable:"sostenible",development:"desarrollo",green:"verdes",spaces:"espacios",efficient:"eficiente",mitigate:"mitigar",negative:"negativos",effects:"efectos",managing:"gestionar",vision:"visión",coordinated:"coordinadas",policy:"políticas",sectors:"sectores"}},
+
+{level:"C", title:"The Complexity of Human Memory", en:"Human memory is far more complex and fallible than most people realize, often reconstructing events rather than simply retrieving them. Cognitive scientists have shown that memories can be distorted by suggestion, emotion, and the passage of time, leading to phenomena such as false memories. This malleability has significant implications for fields like criminal justice, where eyewitness testimony has historically been given considerable weight despite its unreliability. Understanding the mechanisms behind memory formation and distortion can help institutions develop better practices for evaluating recollections. Ultimately, memory should be regarded as a reconstructive process rather than an infallible recording device.",
+es:"La memoria humana es mucho más compleja y falible de lo que la mayoría de las personas se dan cuenta, a menudo reconstruyendo eventos en lugar de simplemente recuperarlos. Los científicos cognitivos han demostrado que los recuerdos pueden ser distorsionados por la sugestión, la emoción y el paso del tiempo, dando lugar a fenómenos como los recuerdos falsos. Esta maleabilidad tiene implicaciones significativas para campos como la justicia penal, donde el testimonio de testigos oculares históricamente ha recibido un peso considerable a pesar de su falta de fiabilidad. Comprender los mecanismos detrás de la formación y distorsión de la memoria puede ayudar a las instituciones a desarrollar mejores prácticas para evaluar los recuerdos. En última instancia, la memoria debería considerarse un proceso reconstructivo en lugar de un dispositivo de grabación infalible.",
+gloss:{human:"humana",memory:"memoria",complex:"compleja",fallible:"falible",realize:"se dan cuenta",reconstructing:"reconstruyendo",events:"eventos",retrieving:"recuperando",cognitive:"cognitivos",scientists:"científicos",distorted:"distorsionados",suggestion:"sugestión",emotion:"emoción",passage:"paso",leading:"dando lugar",phenomena:"fenómenos",false:"falsos",malleability:"maleabilidad",implications:"implicaciones",fields:"campos",criminal:"penal",justice:"justicia",eyewitness:"testigo ocular",testimony:"testimonio",historically:"históricamente",considerable:"considerable",weight:"peso",unreliability:"falta de fiabilidad",mechanisms:"mecanismos",formation:"formación",distortion:"distorsión",institutions:"instituciones",practices:"prácticas",evaluating:"evaluar",recollections:"recuerdos",reconstructive:"reconstructivo",infallible:"infalible",recording:"grabación",device:"dispositivo"}},
+
+{level:"C", title:"The Economics of Inequality", en:"Economic inequality has become one of the most pressing issues in contemporary policy debates, with disparities in wealth widening across many developed nations. Economists disagree on the root causes, pointing to factors such as globalization, technological automation, and shifts in labor market power. While some advocate for progressive taxation and stronger social safety nets, others warn that excessive redistribution could discourage investment and innovation. Regardless of ideological perspective, most researchers agree that unchecked inequality poses risks to social cohesion and long-term economic stability. Addressing this issue effectively will likely require a combination of policy tools rather than a single solution.",
+es:"La desigualdad económica se ha convertido en uno de los temas más urgentes en los debates políticos contemporáneos, con disparidades en la riqueza que se amplían en muchas naciones desarrolladas. Los economistas no están de acuerdo sobre las causas fundamentales, señalando factores como la globalización, la automatización tecnológica y los cambios en el poder del mercado laboral. Mientras que algunos abogan por una tributación progresiva y redes de seguridad social más fuertes, otros advierten que una redistribución excesiva podría desalentar la inversión y la innovación. Independientemente de la perspectiva ideológica, la mayoría de los investigadores coinciden en que la desigualdad sin control representa riesgos para la cohesión social y la estabilidad económica a largo plazo. Abordar este tema de manera efectiva probablemente requerirá una combinación de herramientas de política en lugar de una sola solución.",
+gloss:{economic:"económica",inequality:"desigualdad",pressing:"urgentes",contemporary:"contemporáneos",policy:"política",debates:"debates",disparities:"disparidades",wealth:"riqueza",widening:"ampliándose",developed:"desarrolladas",nations:"naciones",economists:"economistas",disagree:"no están de acuerdo",root:"fundamentales",causes:"causas",pointing:"señalando",factors:"factores",automation:"automatización",shifts:"cambios",labor:"laboral",market:"mercado",advocate:"abogan",progressive:"progresiva",taxation:"tributación",stronger:"más fuertes",safety:"seguridad",nets:"redes",warn:"advierten",excessive:"excesiva",redistribution:"redistribución",discourage:"desalentar",investment:"inversión",innovation:"innovación",regardless:"independientemente",ideological:"ideológica",perspective:"perspectiva",researchers:"investigadores",agree:"coinciden",unchecked:"sin control",poses:"representa",risks:"riesgos",cohesion:"cohesión",stability:"estabilidad",addressing:"abordar",require:"requerirá",combination:"combinación",tools:"herramientas",solution:"solución"}},
+
+{level:"C", title:"Space Exploration in the Twenty-First Century", en:"Space exploration has entered a new era characterized by increasing collaboration between government agencies and private companies. Ambitious projects, such as missions to Mars and the establishment of permanent lunar bases, have captured public imagination while raising practical questions about funding and feasibility. Advocates argue that space exploration drives technological innovation and inspires scientific curiosity among younger generations. Critics, however, contend that resources might be better allocated toward pressing problems on Earth, such as poverty and climate change. Regardless of these debates, humanity's expanding presence beyond our planet seems increasingly inevitable.",
+es:"La exploración espacial ha entrado en una nueva era caracterizada por una creciente colaboración entre agencias gubernamentales y empresas privadas. Proyectos ambiciosos, como misiones a Marte y el establecimiento de bases lunares permanentes, han capturado la imaginación pública mientras plantean preguntas prácticas sobre financiamiento y viabilidad. Los defensores argumentan que la exploración espacial impulsa la innovación tecnológica e inspira la curiosidad científica entre las generaciones más jóvenes. Los críticos, sin embargo, sostienen que los recursos podrían asignarse mejor a problemas urgentes en la Tierra, como la pobreza y el cambio climático. Independientemente de estos debates, la presencia expansiva de la humanidad más allá de nuestro planeta parece cada vez más inevitable.",
+gloss:{space:"espacial",exploration:"exploración",entered:"entrado",era:"era",characterized:"caracterizada",increasing:"creciente",collaboration:"colaboración",government:"gubernamentales",agencies:"agencias",ambitious:"ambiciosos",projects:"proyectos",missions:"misiones",mars:"Marte",establishment:"establecimiento",permanent:"permanentes",lunar:"lunares",bases:"bases",captured:"capturado",imagination:"imaginación",raising:"planteando",practical:"prácticas",funding:"financiamiento",feasibility:"viabilidad",advocates:"defensores",drives:"impulsa",inspires:"inspira",curiosity:"curiosidad",younger:"más jóvenes",critics:"críticos",contend:"sostienen",resources:"recursos",allocated:"asignados",poverty:"pobreza",expanding:"expansiva",presence:"presencia",beyond:"más allá",planet:"planeta",inevitable:"inevitable"}},
+
+{level:"C", title:"The Philosophy of Free Will", en:"The debate over free will versus determinism has occupied philosophers for centuries, touching on fundamental questions about moral responsibility and human agency. Determinists argue that every action is the inevitable result of prior causes, whether physical, psychological, or social, leaving little room for genuine choice. Compatibilists, in contrast, maintain that free will can coexist with determinism if freedom is understood as acting according to one's own desires without external coercion. Recent developments in neuroscience have added new dimensions to this debate, as studies suggest that decisions may be initiated in the brain before individuals become consciously aware of them. Regardless of which position one adopts, the implications for how society assigns blame and praise remain profound.",
+es:"El debate sobre el libre albedrío frente al determinismo ha ocupado a los filósofos durante siglos, tocando preguntas fundamentales sobre la responsabilidad moral y la agencia humana. Los deterministas argumentan que cada acción es el resultado inevitable de causas previas, ya sean físicas, psicológicas o sociales, dejando poco espacio para una elección genuina. Los compatibilistas, en contraste, sostienen que el libre albedrío puede coexistir con el determinismo si la libertad se entiende como actuar de acuerdo con los propios deseos sin coerción externa. Los desarrollos recientes en neurociencia han añadido nuevas dimensiones a este debate, ya que los estudios sugieren que las decisiones pueden iniciarse en el cerebro antes de que los individuos sean conscientes de ellas. Independientemente de la postura que se adopte, las implicaciones sobre cómo la sociedad asigna la culpa y el elogio siguen siendo profundas.",
+gloss:{debate:"debate",free:"libre",will:"albedrío",versus:"frente a",determinism:"determinismo",occupied:"ocupado",philosophers:"filósofos",centuries:"siglos",touching:"tocando",fundamental:"fundamentales",moral:"moral",responsibility:"responsabilidad",agency:"agencia",determinists:"deterministas",action:"acción",inevitable:"inevitable",result:"resultado",prior:"previas",causes:"causas",physical:"físicas",psychological:"psicológicas",social:"sociales",leaving:"dejando",room:"espacio",genuine:"genuina",choice:"elección",compatibilists:"compatibilistas",contrast:"contraste",maintain:"sostienen",coexist:"coexistir",freedom:"libertad",understood:"entendida",acting:"actuar",desires:"deseos",external:"externa",coercion:"coerción",developments:"desarrollos",neuroscience:"neurociencia",dimensions:"dimensiones",decisions:"decisiones",initiated:"iniciarse",brain:"cerebro",individuals:"individuos",consciously:"conscientemente",aware:"conscientes",position:"postura",adopts:"adopte",society:"sociedad",assigns:"asigna",blame:"culpa",praise:"elogio",profound:"profundas"}},
+
+{level:"C", title:"The Impact of Automation on Employment", en:"Automation and artificial intelligence are transforming labor markets at an unprecedented pace, prompting concerns about widespread job displacement. While some economists predict that automation will eliminate entire categories of employment, others argue that history shows technology tends to create new jobs even as it eliminates old ones. Workers in manufacturing, transportation, and administrative roles appear particularly vulnerable to automation, whereas jobs requiring creativity, emotional intelligence, and complex problem-solving are considered more resistant. Policymakers face the challenge of preparing the workforce for this transition through education and retraining programs. The pace and scale of these changes will likely determine whether the transition proves disruptive or manageable for society.",
+es:"La automatización y la inteligencia artificial están transformando los mercados laborales a un ritmo sin precedentes, generando preocupaciones sobre el desplazamiento generalizado de empleos. Mientras algunos economistas predicen que la automatización eliminará categorías enteras de empleo, otros argumentan que la historia muestra que la tecnología tiende a crear nuevos empleos incluso mientras elimina los antiguos. Los trabajadores en manufactura, transporte y roles administrativos parecen particularmente vulnerables a la automatización, mientras que los empleos que requieren creatividad, inteligencia emocional y resolución de problemas complejos se consideran más resistentes. Los responsables políticos enfrentan el desafío de preparar a la fuerza laboral para esta transición a través de programas de educación y recapacitación. El ritmo y la escala de estos cambios probablemente determinarán si la transición resulta disruptiva o manejable para la sociedad.",
+gloss:{automation:"automatización",transforming:"transformando",labor:"laborales",markets:"mercados",unprecedented:"sin precedentes",pace:"ritmo",prompting:"generando",concerns:"preocupaciones",widespread:"generalizado",displacement:"desplazamiento",economists:"economistas",predict:"predicen",eliminate:"eliminará",categories:"categorías",employment:"empleo",tends:"tiende",eliminates:"elimina",workers:"trabajadores",manufacturing:"manufactura",transportation:"transporte",administrative:"administrativos",roles:"roles",vulnerable:"vulnerables",requiring:"que requieren",creativity:"creatividad",resistant:"resistentes",policymakers:"responsables políticos",challenge:"desafío",preparing:"preparar",workforce:"fuerza laboral",transition:"transición",retraining:"recapacitación",programs:"programas",scale:"escala",determine:"determinarán",disruptive:"disruptiva",manageable:"manejable"}},
+
+{level:"C", title:"The Nature of Scientific Progress", en:"Scientific progress is often portrayed as a steady accumulation of knowledge, but historians of science argue that it more closely resembles a series of paradigm shifts. According to this view, established theories are not simply refined over time but occasionally overthrown entirely when accumulated anomalies can no longer be explained within the existing framework. This process can be contentious, as scientific communities are sometimes resistant to abandoning long-held paradigms despite mounting contradictory evidence. Nevertheless, this cycle of disruption and reconstruction has repeatedly proven essential for major breakthroughs, from the shift away from geocentrism to the development of quantum mechanics. Understanding this dynamic helps explain why scientific revolutions often meet significant resistance before gaining acceptance.",
+es:"El progreso científico a menudo se presenta como una acumulación constante de conocimiento, pero los historiadores de la ciencia argumentan que se asemeja más a una serie de cambios de paradigma. Según esta visión, las teorías establecidas no se refinan simplemente con el tiempo, sino que ocasionalmente son derrocadas por completo cuando las anomalías acumuladas ya no pueden explicarse dentro del marco existente. Este proceso puede ser controvertido, ya que las comunidades científicas a veces se resisten a abandonar paradigmas arraigados a pesar de la creciente evidencia contradictoria. Sin embargo, este ciclo de disrupción y reconstrucción ha demostrado repetidamente ser esencial para grandes avances, desde el abandono del geocentrismo hasta el desarrollo de la mecánica cuántica. Comprender esta dinámica ayuda a explicar por qué las revoluciones científicas a menudo encuentran una resistencia significativa antes de ganar aceptación.",
+gloss:{scientific:"científico",progress:"progreso",portrayed:"presentado",steady:"constante",accumulation:"acumulación",knowledge:"conocimiento",historians:"historiadores",resembles:"se asemeja",series:"serie",paradigm:"paradigma",shifts:"cambios",established:"establecidas",theories:"teorías",refined:"refinadas",occasionally:"ocasionalmente",overthrown:"derrocadas",entirely:"por completo",accumulated:"acumuladas",anomalies:"anomalías",explained:"explicarse",existing:"existente",framework:"marco",contentious:"controvertido",communities:"comunidades",resistant:"resistentes",abandoning:"abandonar",mounting:"creciente",contradictory:"contradictoria",evidence:"evidencia",cycle:"ciclo",disruption:"disrupción",reconstruction:"reconstrucción",proven:"demostrado",breakthroughs:"avances",shift:"abandono",geocentrism:"geocentrismo",development:"desarrollo",quantum:"cuántica",mechanics:"mecánica",dynamic:"dinámica",revolutions:"revoluciones",resistance:"resistencia",acceptance:"aceptación"}},
+
+{level:"C", title:"The Consequences of Social Media Algorithms", en:"Social media algorithms are designed to maximize user engagement, often by prioritizing emotionally charged or controversial content over balanced information. Critics argue that this design encourages polarization, as users are repeatedly exposed to content that reinforces their existing beliefs rather than challenging them. Platforms have faced increasing pressure to address misinformation and the spread of extremist content, yet implementing effective solutions remains technically and politically complicated. Some researchers advocate for greater transparency regarding how algorithms function, arguing that users deserve to understand why they see particular content. Ultimately, the tension between platform profitability and public interest continues to shape ongoing debates about regulation.",
+es:"Los algoritmos de las redes sociales están diseñados para maximizar la participación del usuario, a menudo priorizando contenido emocionalmente cargado o controvertido sobre información equilibrada. Los críticos argumentan que este diseño fomenta la polarización, ya que los usuarios están repetidamente expuestos a contenido que refuerza sus creencias existentes en lugar de desafiarlas. Las plataformas han enfrentado una presión creciente para abordar la desinformación y la propagación de contenido extremista, pero implementar soluciones efectivas sigue siendo técnica y políticamente complicado. Algunos investigadores abogan por una mayor transparencia sobre cómo funcionan los algoritmos, argumentando que los usuarios merecen entender por qué ven cierto contenido. En última instancia, la tensión entre la rentabilidad de las plataformas y el interés público sigue dando forma a los debates continuos sobre la regulación.",
+gloss:{algorithms:"algoritmos",designed:"diseñados",maximize:"maximizar",engagement:"participación",prioritizing:"priorizando",emotionally:"emocionalmente",charged:"cargado",controversial:"controvertido",content:"contenido",balanced:"equilibrada",encourages:"fomenta",polarization:"polarización",exposed:"expuestos",reinforces:"refuerza",beliefs:"creencias",challenging:"desafiar",platforms:"plataformas",faced:"enfrentado",pressure:"presión",address:"abordar",misinformation:"desinformación",spread:"propagación",extremist:"extremista",implementing:"implementar",technically:"técnicamente",politically:"políticamente",complicated:"complicado",researchers:"investigadores",advocate:"abogan",transparency:"transparencia",function:"funcionan",deserve:"merecen",understand:"entender",particular:"cierto",profitability:"rentabilidad",interest:"interés",ongoing:"continuos",regulation:"regulación"}},
+
+{level:"C", title:"Reassessing Standardized Education", en:"Standardized education systems, designed to ensure consistency across large populations of students, have come under growing scrutiny for their limitations. Critics contend that a one-size-fits-all curriculum fails to account for diverse learning styles, cultural backgrounds, and individual strengths. Standardized testing, in particular, has been criticized for prioritizing rote memorization over critical thinking and creativity. Proponents of reform advocate for more personalized approaches, including project-based learning and flexible assessment methods that better reflect real-world skills. Nevertheless, implementing such reforms on a large scale poses significant logistical and financial challenges for education systems already stretched thin.",
+es:"Los sistemas de educación estandarizada, diseñados para garantizar consistencia entre grandes poblaciones de estudiantes, han sido objeto de un escrutinio creciente por sus limitaciones. Los críticos sostienen que un currículo único para todos no logra tener en cuenta los diversos estilos de aprendizaje, orígenes culturales y fortalezas individuales. Las pruebas estandarizadas, en particular, han sido criticadas por priorizar la memorización mecánica sobre el pensamiento crítico y la creatividad. Los defensores de la reforma abogan por enfoques más personalizados, incluyendo el aprendizaje basado en proyectos y métodos de evaluación flexibles que reflejen mejor las habilidades del mundo real. Sin embargo, implementar tales reformas a gran escala plantea desafíos logísticos y financieros significativos para sistemas educativos ya sobrecargados.",
+gloss:{standardized:"estandarizada",education:"educación",ensure:"garantizar",consistency:"consistencia",populations:"poblaciones",scrutiny:"escrutinio",limitations:"limitaciones",contend:"sostienen",curriculum:"currículo",account:"tener en cuenta",diverse:"diversos",learning:"aprendizaje",styles:"estilos",cultural:"culturales",backgrounds:"orígenes",individual:"individuales",strengths:"fortalezas",testing:"pruebas",criticized:"criticadas",prioritizing:"priorizar",rote:"mecánica",memorization:"memorización",critical:"crítico",thinking:"pensamiento",creativity:"creatividad",proponents:"defensores",reform:"reforma",advocate:"abogan",personalized:"personalizados",approaches:"enfoques",project:"proyectos",flexible:"flexibles",assessment:"evaluación",methods:"métodos",reflect:"reflejen",real:"real",skills:"habilidades",implementing:"implementar",reforms:"reformas",poses:"plantea",logistical:"logísticos",financial:"financieros",challenges:"desafíos",stretched:"sobrecargados"}},
+
+{level:"C", title:"The Paradox of Choice", en:"Modern consumer culture often equates freedom with an abundance of choices, yet psychological research suggests that excessive options can lead to decreased satisfaction and increased anxiety. This phenomenon, sometimes called the paradox of choice, occurs because evaluating numerous alternatives requires significant cognitive effort and heightens the fear of making a suboptimal decision. Studies have shown that consumers presented with fewer options often report greater confidence and satisfaction with their final choice compared to those overwhelmed by extensive selections. Businesses have begun to recognize this dynamic, simplifying product lines in some cases to improve customer experience. This paradox challenges the assumption that more choice is inherently beneficial.",
+es:"La cultura de consumo moderna a menudo equipara la libertad con una abundancia de opciones, sin embargo, la investigación psicológica sugiere que un exceso de opciones puede llevar a una menor satisfacción y una mayor ansiedad. Este fenómeno, a veces llamado la paradoja de la elección, ocurre porque evaluar numerosas alternativas requiere un esfuerzo cognitivo significativo y aumenta el miedo a tomar una decisión subóptima. Los estudios han demostrado que los consumidores a quienes se les presentan menos opciones a menudo reportan mayor confianza y satisfacción con su elección final en comparación con quienes se sienten abrumados por selecciones extensas. Las empresas han comenzado a reconocer esta dinámica, simplificando en algunos casos las líneas de productos para mejorar la experiencia del cliente. Esta paradoja desafía la suposición de que más opciones son inherentemente beneficiosas.",
+gloss:{modern:"moderna",consumer:"consumo",culture:"cultura",equates:"equipara",freedom:"libertad",abundance:"abundancia",choices:"opciones",psychological:"psicológica",research:"investigación",excessive:"exceso",options:"opciones",lead:"llevar",decreased:"menor",satisfaction:"satisfacción",increased:"mayor",anxiety:"ansiedad",phenomenon:"fenómeno",paradox:"paradoja",choice:"elección",occurs:"ocurre",evaluating:"evaluar",numerous:"numerosas",alternatives:"alternativas",cognitive:"cognitivo",effort:"esfuerzo",heightens:"aumenta",fear:"miedo",suboptimal:"subóptima",decision:"decisión",consumers:"consumidores",presented:"presentan",fewer:"menos",confidence:"confianza",compared:"en comparación",overwhelmed:"abrumados",extensive:"extensas",selections:"selecciones",businesses:"empresas",recognize:"reconocer",dynamic:"dinámica",simplifying:"simplificando",product:"productos",lines:"líneas",improve:"mejorar",customer:"cliente",assumption:"suposición",inherently:"inherentemente",beneficial:"beneficiosas"}},
+
+{level:"C", title:"Bridging the Digital Divide", en:"Despite widespread technological advancement, a significant digital divide persists between populations with reliable internet access and those without. This gap disproportionately affects rural communities and low-income households, limiting their access to education, healthcare information, and economic opportunities. Governments and nonprofit organizations have launched various initiatives to expand broadband infrastructure, though progress remains uneven across different regions. Some experts argue that internet access should be treated as a fundamental utility, similar to electricity or water, given its increasing centrality to daily life. Closing this divide will require sustained investment and coordinated policy rather than isolated, short-term projects.",
+es:"A pesar del avance tecnológico generalizado, persiste una brecha digital significativa entre las poblaciones con acceso confiable a internet y las que no lo tienen. Esta brecha afecta desproporcionadamente a las comunidades rurales y a los hogares de bajos ingresos, limitando su acceso a la educación, la información de salud y las oportunidades económicas. Los gobiernos y las organizaciones sin fines de lucro han lanzado varias iniciativas para expandir la infraestructura de banda ancha, aunque el progreso sigue siendo desigual entre diferentes regiones. Algunos expertos argumentan que el acceso a internet debería tratarse como un servicio fundamental, similar a la electricidad o el agua, dada su creciente centralidad en la vida diaria. Cerrar esta brecha requerirá una inversión sostenida y políticas coordinadas en lugar de proyectos aislados y de corto plazo.",
+gloss:{widespread:"generalizado",technological:"tecnológico",advancement:"avance",digital:"digital",divide:"brecha",persists:"persiste",populations:"poblaciones",reliable:"confiable",internet:"internet",access:"acceso",gap:"brecha",disproportionately:"desproporcionadamente",affects:"afecta",rural:"rurales",communities:"comunidades",income:"ingresos",households:"hogares",limiting:"limitando",healthcare:"salud",economic:"económicas",opportunities:"oportunidades",nonprofit:"sin fines de lucro",organizations:"organizaciones",launched:"lanzado",initiatives:"iniciativas",expand:"expandir",broadband:"banda ancha",infrastructure:"infraestructura",progress:"progreso",uneven:"desigual",regions:"regiones",experts:"expertos",fundamental:"fundamental",utility:"servicio",similar:"similar",electricity:"electricidad",centrality:"centralidad",daily:"diaria",closing:"cerrar",require:"requerirá",sustained:"sostenida",investment:"inversión",coordinated:"coordinadas",isolated:"aislados"}},
+
+{level:"C", title:"The Neuroscience of Habit Formation", en:"Habits form through a neurological process in which repeated behaviors become encoded as automatic responses, reducing the cognitive effort required for decision-making. This process, often described through the cue-routine-reward loop, explains why breaking established habits can be remarkably difficult even when individuals consciously desire change. Neuroscientific research indicates that habitual behaviors are governed largely by the basal ganglia, a brain region associated with automatic, non-conscious processing. Understanding this mechanism has practical implications for behavior change interventions, suggesting that altering cues or rewards may be more effective than relying solely on willpower. This research challenges the common assumption that habit change is primarily a matter of self-discipline.",
+es:"Los hábitos se forman a través de un proceso neurológico en el que las conductas repetidas se codifican como respuestas automáticas, reduciendo el esfuerzo cognitivo necesario para la toma de decisiones. Este proceso, a menudo descrito mediante el ciclo de señal-rutina-recompensa, explica por qué romper hábitos establecidos puede ser notablemente difícil incluso cuando los individuos desean conscientemente el cambio. La investigación neurocientífica indica que los comportamientos habituales están regidos en gran medida por los ganglios basales, una región del cerebro asociada con el procesamiento automático y no consciente. Comprender este mecanismo tiene implicaciones prácticas para las intervenciones de cambio de comportamiento, sugiriendo que alterar las señales o las recompensas puede ser más efectivo que confiar únicamente en la fuerza de voluntad. Esta investigación desafía la suposición común de que el cambio de hábitos es principalmente una cuestión de autodisciplina.",
+gloss:{habits:"hábitos",form:"forman",neurological:"neurológico",process:"proceso",repeated:"repetidas",behaviors:"conductas",encoded:"codificadas",automatic:"automáticas",responses:"respuestas",reducing:"reduciendo",cognitive:"cognitivo",required:"necesario",decision:"decisiones",described:"descrito",cue:"señal",routine:"rutina",reward:"recompensa",loop:"ciclo",explains:"explica",breaking:"romper",established:"establecidos",remarkably:"notablemente",individuals:"individuos",consciously:"conscientemente",desire:"desean",neuroscientific:"neurocientífica",indicates:"indica",habitual:"habituales",governed:"regidos",basal:"basales",ganglia:"ganglios",brain:"cerebro",region:"región",associated:"asociada",processing:"procesamiento",mechanism:"mecanismo",practical:"prácticas",implications:"implicaciones",interventions:"intervenciones",suggesting:"sugiriendo",altering:"alterar",cues:"señales",rewards:"recompensas",relying:"confiar",solely:"únicamente",willpower:"fuerza de voluntad",assumption:"suposición",discipline:"disciplina"}},
+
+{level:"C", title:"The Legacy of Colonialism in Modern Economies", en:"The economic structures of many former colonies continue to reflect patterns established during periods of colonial rule, even decades after independence. Historians and economists argue that extractive institutions, originally designed to funnel resources toward colonial powers, often left lasting legacies of weak governance and limited industrial development. In contrast, regions where colonial powers established more inclusive institutions tend to show stronger long-term economic outcomes. This divergence has sparked extensive debate about the extent to which historical colonial policies continue to influence contemporary inequality between nations. Addressing these enduring disparities requires acknowledging historical context while pursuing forward-looking development strategies.",
+es:"Las estructuras económicas de muchas antiguas colonias continúan reflejando patrones establecidos durante los períodos de dominio colonial, incluso décadas después de la independencia. Historiadores y economistas argumentan que las instituciones extractivas, originalmente diseñadas para canalizar recursos hacia las potencias coloniales, a menudo dejaron legados duraderos de gobernanza débil y desarrollo industrial limitado. En contraste, las regiones donde las potencias coloniales establecieron instituciones más inclusivas tienden a mostrar resultados económicos más sólidos a largo plazo. Esta divergencia ha generado un extenso debate sobre hasta qué punto las políticas coloniales históricas siguen influyendo en la desigualdad contemporánea entre naciones. Abordar estas disparidades persistentes requiere reconocer el contexto histórico mientras se persiguen estrategias de desarrollo orientadas al futuro.",
+gloss:{economic:"económicas",structures:"estructuras",former:"antiguas",colonies:"colonias",reflect:"reflejando",patterns:"patrones",established:"establecidos",periods:"períodos",colonial:"colonial",rule:"dominio",decades:"décadas",independence:"independencia",historians:"historiadores",economists:"economistas",extractive:"extractivas",institutions:"instituciones",originally:"originalmente",funnel:"canalizar",resources:"recursos",powers:"potencias",lasting:"duraderos",legacies:"legados",weak:"débil",governance:"gobernanza",industrial:"industrial",development:"desarrollo",contrast:"contraste",regions:"regiones",inclusive:"inclusivas",stronger:"más sólidos",outcomes:"resultados",divergence:"divergencia",sparked:"generado",extensive:"extenso",debate:"debate",extent:"punto",historical:"históricas",policies:"políticas",influence:"influyendo",contemporary:"contemporánea",inequality:"desigualdad",nations:"naciones",enduring:"persistentes",disparities:"disparidades",acknowledging:"reconocer",context:"contexto",pursuing:"persiguiendo",strategies:"estrategias"}},
+
+{level:"C", title:"The Role of Uncertainty in Scientific Communication", en:"Effectively communicating scientific uncertainty to the public presents a persistent challenge, particularly in contexts such as public health crises or climate policy. Scientists are trained to express findings probabilistically, acknowledging the limitations and confidence intervals inherent in their research. However, this nuanced language can be misinterpreted by the public as a lack of consensus or credibility, potentially undermining trust in scientific institutions. Media outlets further complicate this dynamic, as they sometimes prioritize dramatic or definitive statements over accurate representations of scientific nuance. Developing communication strategies that convey uncertainty without eroding public confidence remains an ongoing challenge for scientists, journalists, and policymakers alike.",
+es:"Comunicar de manera efectiva la incertidumbre científica al público presenta un desafío persistente, particularmente en contextos como las crisis de salud pública o la política climática. Los científicos están capacitados para expresar hallazgos de manera probabilística, reconociendo las limitaciones y los intervalos de confianza inherentes a su investigación. Sin embargo, este lenguaje matizado puede ser malinterpretado por el público como una falta de consenso o credibilidad, lo que potencialmente socava la confianza en las instituciones científicas. Los medios de comunicación complican aún más esta dinámica, ya que a veces priorizan declaraciones dramáticas o definitivas sobre representaciones precisas de los matices científicos. Desarrollar estrategias de comunicación que transmitan la incertidumbre sin erosionar la confianza pública sigue siendo un desafío constante para científicos, periodistas y responsables políticos por igual.",
+gloss:{effectively:"efectivamente",communicating:"comunicar",scientific:"científica",uncertainty:"incertidumbre",public:"público",persistent:"persistente",contexts:"contextos",health:"salud",crises:"crisis",climate:"climática",policy:"política",scientists:"científicos",trained:"capacitados",express:"expresar",findings:"hallazgos",probabilistically:"probabilísticamente",acknowledging:"reconociendo",limitations:"limitaciones",confidence:"confianza",intervals:"intervalos",inherent:"inherentes",research:"investigación",nuanced:"matizado",language:"lenguaje",misinterpreted:"malinterpretado",lack:"falta",consensus:"consenso",credibility:"credibilidad",undermining:"socavando",trust:"confianza",institutions:"instituciones",media:"medios",outlets:"medios",complicate:"complican",dynamic:"dinámica",prioritize:"priorizan",dramatic:"dramáticas",definitive:"definitivas",statements:"declaraciones",accurate:"precisas",representations:"representaciones",nuance:"matices",developing:"desarrollar",strategies:"estrategias",convey:"transmitan",eroding:"erosionar",ongoing:"constante",journalists:"periodistas",policymakers:"responsables políticos"}},
+
+{level:"C", title:"Redefining Success in the Modern Workplace", en:"Traditional definitions of professional success, centered on titles, salary, and hierarchical advancement, are increasingly being challenged by shifting workplace values. Younger generations entering the workforce often prioritize work-life balance, purpose-driven employment, and mental well-being over conventional markers of achievement. This shift has prompted many organizations to reconsider their approach to employee engagement, offering flexible schedules and emphasizing psychological safety within teams. Critics of this trend argue that overemphasizing personal fulfillment could undermine organizational productivity and accountability. Nevertheless, evidence increasingly suggests that employees who find genuine meaning in their work tend to demonstrate greater long-term commitment and performance.",
+es:"Las definiciones tradicionales de éxito profesional, centradas en los títulos, el salario y el ascenso jerárquico, están siendo cada vez más cuestionadas por los cambiantes valores en el lugar de trabajo. Las generaciones más jóvenes que ingresan a la fuerza laboral a menudo priorizan el equilibrio entre vida y trabajo, el empleo con propósito y el bienestar mental por encima de los marcadores convencionales de logro. Este cambio ha llevado a muchas organizaciones a reconsiderar su enfoque hacia la participación de los empleados, ofreciendo horarios flexibles y enfatizando la seguridad psicológica dentro de los equipos. Los críticos de esta tendencia argumentan que sobreenfatizar la realización personal podría socavar la productividad y la responsabilidad organizacional. Sin embargo, la evidencia sugiere cada vez más que los empleados que encuentran un significado genuino en su trabajo tienden a demostrar un mayor compromiso y desempeño a largo plazo.",
+gloss:{traditional:"tradicionales",definitions:"definiciones",professional:"profesional",success:"éxito",centered:"centradas",titles:"títulos",salary:"salario",hierarchical:"jerárquico",advancement:"ascenso",challenged:"cuestionadas",shifting:"cambiantes",workplace:"lugar de trabajo",values:"valores",younger:"más jóvenes",generations:"generaciones",entering:"que ingresan",workforce:"fuerza laboral",prioritize:"priorizan",balance:"equilibrio",purpose:"propósito",driven:"impulsado",employment:"empleo",wellbeing:"bienestar",conventional:"convencionales",markers:"marcadores",achievement:"logro",shift:"cambio",prompted:"llevado",organizations:"organizaciones",reconsider:"reconsiderar",approach:"enfoque",engagement:"participación",offering:"ofreciendo",flexible:"flexibles",schedules:"horarios",emphasizing:"enfatizando",psychological:"psicológica",safety:"seguridad",teams:"equipos",trend:"tendencia",overemphasizing:"sobreenfatizar",fulfillment:"realización",undermine:"socavar",productivity:"productividad",accountability:"responsabilidad",evidence:"evidencia",genuine:"genuino",meaning:"significado",commitment:"compromiso",performance:"desempeño"}}
+];
+
+/* ============ FUNCIONES AUXILIARES ============ */
+function lookup(rawWord, gloss){
+  const clean = rawWord.toLowerCase().replace(/[^a-záéíóúñü']/gi,"");
+  if(!clean) return null;
+  if(gloss && gloss[clean]) return gloss[clean];
+  if(FUNC[clean]) return FUNC[clean];
+  // intentar quitar sufijos comunes
+  const strip = [
+    [/ies$/,"y"], [/es$/,""], [/s$/,""], [/ing$/,""], [/ed$/,""], [/ed$/,"e"], [/ing$/,"e"]
+  ];
+  for(const [pat, rep] of strip){
+    if(pat.test(clean)){
+      const base = clean.replace(pat, rep);
+      if(gloss && gloss[base]) return gloss[base];
+      if(FUNC[base]) return FUNC[base];
+    }
+  }
+  return null;
+}
+
+function tokenize(text){
+  // separa en palabras y signos de puntuación, preservando espacios
+  return text.match(/[A-Za-z']+|[^A-Za-z']+/g) || [];
+}
+
+function buildTextHTML(entry, idx){
+  const tokens = tokenize(entry.en);
+  let html = "";
+  tokens.forEach((tok, i)=>{
+    if(/^[A-Za-z']+$/.test(tok)){
+      html += `<span class="w" data-txt="${idx}" data-word="${tok.replace(/"/g,'&quot;')}">${tok}</span>`;
+    } else {
+      html += `<span class="punct">${tok.replace(/\\n/g,"<br>")}</span>`;
+    }
+  });
+  return html;
+}
+
+/* ============ RENDER ============ */
+const mainList = document.getElementById("mainList");
+const emptyMsg = document.getElementById("emptyMsg");
+const countNote = document.getElementById("countNote");
+let currentLevel = "ALL";
+let currentSearch = "";
+
+function render(){
+  mainList.innerHTML = "";
+  const filtered = TEXTS
+    .map((t,i)=>({...t, idx:i}))
+    .filter(t => (currentLevel==="ALL" || t.level===currentLevel))
+    .filter(t => t.title.toLowerCase().includes(currentSearch.toLowerCase()));
+
+  countNote.textContent = `${filtered.length} texto(s) encontrados`;
+  emptyMsg.style.display = filtered.length ? "none" : "block";
+
+  filtered.forEach(entry=>{
+    const card = document.createElement("div");
+    card.className = "card";
+    card.innerHTML = `
+      <div class="card-head">
+        <span class="tag ${entry.level}">Nivel ${entry.level}</span>
+        <h3 class="card-title">${entry.title}</h3>
+        <span class="chevron">▶</span>
+      </div>
+      <div class="card-body">
+        <div class="text-block">${buildTextHTML(entry, entry.idx)}</div>
+        <div class="toolbar">
+          <button class="btn btn-translate">Traducción completa</button>
+          <button class="btn btn-hide-word" style="display:none;">Ocultar palabra</button>
+        </div>
+        <div class="word-pop"></div>
+        <div class="full-translation">${entry.es}</div>
+      </div>
+    `;
+    mainList.appendChild(card);
+
+    const head = card.querySelector(".card-head");
+    head.addEventListener("click", ()=> card.classList.toggle("open"));
+
+    const btnTranslate = card.querySelector(".btn-translate");
+    const fullDiv = card.querySelector(".full-translation");
+    btnTranslate.addEventListener("click", (e)=>{
+      e.stopPropagation();
+      fullDiv.classList.toggle("show");
+      btnTranslate.textContent = fullDiv.classList.contains("show") ? "Ocultar traducción" : "Traducción completa";
+    });
+
+    const wordPop = card.querySelector(".word-pop");
+    card.querySelectorAll(".w").forEach(span=>{
+      span.addEventListener("click", (e)=>{
+        e.stopPropagation();
+        card.querySelectorAll(".w.picked").forEach(s=>s.classList.remove("picked"));
+        span.classList.add("picked");
+        const word = span.dataset.word;
+        const translation = lookup(word, entry.gloss);
+        wordPop.innerHTML = translation
+          ? `<b>${word}</b> → ${translation}`
+          : `<b>${word}</b> → (traducción no disponible; prueba con "Traducción completa")`;
+        wordPop.classList.add("show");
+      });
+    });
+  });
+}
+
+document.querySelectorAll(".lvl-btn").forEach(btn=>{
+  btn.addEventListener("click", ()=>{
+    document.querySelectorAll(".lvl-btn").forEach(b=>b.classList.remove("active"));
+    btn.classList.add("active");
+    currentLevel = btn.dataset.lvl;
+    render();
+  });
+});
+
+document.getElementById("searchBox").addEventListener("input", (e)=>{
+  currentSearch = e.target.value;
+  render();
+});
+
+render();
+</script>
+</body>
+</html>
